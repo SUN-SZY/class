@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语老师课程表</title>
+    <!-- 引入 Vue 3 -->
+    <script src="./vue/vue.global.prod.min.js"></script>
+    <script src="./vue/vue-router.global.min.js"></script>
+    <style>
+        /* 自定义样式 */
+        .course-table {
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .has-class {
+            background-color: #e7e6e1;
+        }
+        .no-class {
+            background-color: transparent;
+        }
+        .morning-study {
+            background-color: #e7e6e1;
+        }
+        .with-class {
+            width: 20%;
+        }
+        .special-event {
+            background-color: #bad7df;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="course-table">
+    <h1>{{ season }}英语老师课程表</h1>
+    <table>
+        <thead>
+            <tr>
+                <th v-for="column in columns" :key="column.key">{{ column.title }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="record in currentData" :key="record.key">
+                <td v-for="column in columns" :key="column.key" :class="getClass(record[column.dataIndex], column)">
+                    {{ record[column.dataIndex] || '       ' }}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const { createApp, ref, computed } = Vue;
+
+    const app = createApp({
+        setup() {
+            const columns = [
+                { title: '时间', dataIndex: 'time', key: 'time' },
+                { title: '周一', dataIndex: 'monday', key: 'monday' },
+                { title: '周二', dataIndex: 'tuesday', key: 'tuesday' },
+                { title: '周三', dataIndex: 'wednesday', key: 'wednesday' },
+                { title: '周四', dataIndex: 'thursday', key: 'thursday' },
+                { title: '周五', dataIndex: 'friday', key: 'friday' },
+                { title: '周六', dataIndex: 'saturday', key: 'saturday' },
+                { title: '周日', dataIndex: 'sunday', key: 'sunday' },
+            ];
+
+            const springData = [
+                {
+                    key: 1,
+                    time: '5:30 - 6:30',
+                    monday: '七班早自习',
+                    tuesday: '八班早自习',
+                    wednesday: '       ',
+                    thursday: '八班早自习',
+                    friday: '七班早自习',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 2,
+                    time: '7:20 - 7:40',
+                    monday: '到校',
+                    tuesday: '到校',
+                    wednesday: '到校',
+                    thursday: '到校',
+                    friday: '到校',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 3,
+                    time: '8:10',
+                    monday: '预备',
+                    tuesday: '预备',
+                    wednesday: '预备',
+                    thursday: '预备',
+                    friday: '预备',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 4,
+                    time: '8:20 - 9:00',
+                    monday: '七班',
+                    tuesday: '八班',
+                    wednesday: '七班',
+                    thursday: '八班',
+                    friday: '七班',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 5,
+                    time: '9:10 - 9:50',
+                    monday: '八班',
+                    tuesday: '七班',
+                    wednesday: '八班',
+                    thursday: '七班',
+                    friday: '八班',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 6,
+                    time: '9:50 - 10:10',
+                    monday: '课间操·大课间',
+                    tuesday: '课间操·大课间',
+                    wednesday: '课间操·大课间',
+                    thursday: '课间操·大课间',
+                    friday: '课间操·大课间',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 7,
+                    time: '10:10 - 10:50',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 8,
+                    time: '11:00 - 11:40',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 9,
+                    time: '11:40 - 12:00',
+                    monday: '放学（分年级错时）',
+                    tuesday: '放学（分年级错时）',
+                    wednesday: '放学（分年级错时）',
+                    thursday: '放学（分年级错时）',
+                    friday: '放学（分年级错时）',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 10,
+                    time: '13:00 - 13:50',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 11,
+                    time: '13:50 - 14:00',
+                    monday: '到校',
+                    tuesday: '到校',
+                    wednesday: '到校',
+                    thursday: '到校',
+                    friday: '到校',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 12,
+                    time: '14:20',
+                    monday: '预备',
+                    tuesday: '预备',
+                    wednesday: '预备',
+                    thursday: '预备',
+                    friday: '预备',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 13,
+                    time: '14:30 - 15:10',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 14,
+                    time: '15:20 - 16:00',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 15,
+                    time: '16:10 - 16:20',
+                    monday: '眼保健操',
+                    tuesday: '眼保健操',
+                    wednesday: '眼保健操',
+                    thursday: '眼保健操',
+                    friday: '眼保健操',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 16,
+                    time: '16:25 - 17:05',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 17,
+                    time: '17:05 - 17:35',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 18,
+                    time: '17:35 - 18:00',
+                    monday: '离校（分年级错时）',
+                    tuesday: '离校（分年级错时）',
+                    wednesday: '离校（分年级错时）',
+                    thursday: '离校（分年级错时）',
+                    friday: '离校（分年级错时）',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 19,
+                    time: '18:00 - 19:00',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '八班晚自习',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 20,
+                    time: '19:00 - 20:00',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: '会议'
+                },
+            ];
+
+            const autumnData = [
+                {
+                    key: 1,
+                    time: '早读 6:20 - 7:10',
+                    monday: '七班早读',
+                    tuesday: '八班早读',
+                    wednesday: '       ',
+                    thursday: '八班早读',
+                    friday: '七班早读',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 2,
+                    time: '第一节   8:30 - 9:10',
+                    monday: '七班',
+                    tuesday: '八班',
+                    wednesday: '七班',
+                    thursday: '八班',
+                    friday: '七班',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 3,
+                    time: '第二节   9:20 - 10:00',
+                    monday: '八班',
+                    tuesday: '七班',
+                    wednesday: '八班',
+                    thursday: '七班',
+                    friday: '八班',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 4,
+                    time: '第三节 10:30 - 11:10',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 5,
+                    time: '第四节 11:20 - 12:00',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 6,
+                    time: '午辅导 12:40 - 13:40',
+                    monday: '',
+                    tuesday: '',
+                    wednesday: '午辅导 ',
+                    thursday: '',
+                    friday: '',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 7,
+                    time: '第五节 13:50 - 14:30',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '    八班   ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 8,
+                    time: '第六节 14:40 - 15:20',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 9,
+                    time: '第七节 15:30 - 16:10',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 10,
+                    time: '第八节 16:20 - 17:00',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '    七班   ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 11,
+                    time: '课外活动 17:00 - 17:30',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 12,
+                    time: '课外辅导 17:40 - 18:10',
+                    monday: '课外辅导',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+                {
+                    key: 13,
+                    time: '第十节 18:20 - 19:20',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: '会议'
+                },
+                {
+                    key: 14,
+                    time: '十一节 19:30 - 20:30',
+                    monday: '       ',
+                    tuesday: '       ',
+                    wednesday: '       ',
+                    thursday: '       ',
+                    friday: '       ',
+                    saturday: '',
+                    sunday: ''
+                },
+            ];
+
+            const currentDate = new Date();
+            const month = currentDate.getMonth() + 1; // 月份从0开始，所以加1
+
+            const season = ref(month >= 3 && month <= 5 ? '春季' : month >= 9 && month <= 11 ? '秋季' : '其他');
+
+            const currentData = computed(() => {
+                return season.value === '春季' ? springData : autumnData;
+            });
+
+            const getClass = (content, column) => {
+                if (column.key === 'time') {
+                    return 'with-class';
+                }
+                if (!content|| content === '       '|| content === '午辅导') {
+                    return 'no-class';
+                }
+                if (content.includes('早自习') || content.includes('早读')) {
+                    return 'morning-study';
+                } else if (content.includes('会议')) {
+                    return 'special-event';
+                } else {
+                    return 'has-class';
+                }
+            };
+
+            return {
+                columns,
+                currentData,
+                season,
+                getClass
+            };
+        },
+    });
+
+    app.mount('#app');
+</script>
+</body>
+</html>
